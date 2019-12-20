@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -298,7 +299,16 @@ func (md *MetaData) unifyMap(mapping interface{}, rv reflect.Value) error {
 		}
 		md.context = md.context[0 : len(md.context)-1]
 
-		rvkey.SetString(k)
+		switch rvkey.Type().Kind() {
+		case reflect.Int:
+			v, err := strconv.ParseInt(k, 10, 64)
+			if err != nil {
+				return err
+			}
+			rvkey.SetInt(v)
+		default:
+			rvkey.SetString(k)
+		}
 		rv.SetMapIndex(rvkey, rvval)
 	}
 	return nil
